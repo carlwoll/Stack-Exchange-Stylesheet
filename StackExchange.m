@@ -1,0 +1,226 @@
+System`Private`NewContextPath[{"System`"}]
+
+BeginPackage["StackExchange`"]
+
+parseString::usage = "replace strings with Cell equivalents"
+parseInput::usage = "parse input, possibly including Box structures"
+convertInput::usage = "convert parsed input"
+setStyle::usage = "setStyle[cell, style] sets the style of cell"
+seString::usage = "seString returns the StackExchange string version"
+toHybrid::usage = "toHybrid converts a cell to an editable WYSIWYG version"
+
+$StackExchangeInitialization::usage = "Global variable indicating that the package has been initialized"
+
+Begin["`Private`"]
+
+$StackExchangeInitialization = True
+
+setStyle[Cell[a_, Longest[___String], b___], style_String] := Cell[a, style, b]
+
+parseString[str_String] := Block[{interpretCode, $NewSymbol = Sow[#2<>#1]&},
+	First @ Reap[
+		StringReplace[str,
+			{
+			"``"~~Shortest[w__]~~"``":>Cell[w, If[NameQ[w], "Symbol", "CodeInput"]],
+			"`"~~Longest[w__]~~"`" /; SyntaxQ[w] :> interpretCode[w],
+			b:(StartOfString|_)~~"$$"~~Shortest[w__]~~"$$"~~e:(EndOfString|_):>If[b===e==="\n",
+				Sequence @@ {b, Cell[w,"TeXInput"], e},
+				Sequence @@ {b, "\n", Cell[w,"TeXInput"], "\n", e}
+			],
+			"$"~~Shortest[w__]~~"$":>Cell[w,"InlineTeXInput"],
+			StartOfString~~w:Shortest[Except[WhitespaceCharacter]~~__]~~WordBoundary:>w,
+			"." ~~ ws:Whitespace ~~ WordBoundary ~~ Shortest[w__] ~~ WordBoundary :> "."<>ws<>w,
+			"["~~label__~~"]("~~link__~~")"/;StringFreeQ[label,"]"]&&StringFreeQ[link,")"] :> Cell[{label,link}, "Hyperlink"],
+			h:(LetterCharacter~~WordCharacter...)~~"["~~Shortest[w__]/;StringCount[h,WordBoundary|"$"]==2&&SyntaxQ[h<>"["<>w] :>Cell[h<>"["<>w,"CodeInput"],
+			WordBoundary~~w__~~WordBoundary /;StringLength[w]>1&&If[StringFreeQ[w,"`"],NameQ["System`"<>w],NameQ[w]] :>Cell[w,"Symbol"]
+			}
+		],
+		_,
+		Remove /@ #2&
+	]
+]
+
+interpretCode[w_] := Which[
+	StringFreeQ[w, "`"], Cell[w, If[NameQ["System`"<>w], "Symbol", "CodeInput"]],
+	NameQ[w]&&StringMatchQ[w, "Developer`"~~__], Cell[w, "Symbol"],
+	True, Cell[w, "CodeInput"]
+]
+
+seString = ReplaceAll[#,
+	{
+	Cell[BoxData[TemplateBox[{a_, b_}, "SymbolTemplate"]], ___] :> b,
+	Cell[BoxData[TemplateBox[{a_, b_}, "CodeTemplate"]], ___] :> If[StringFreeQ[b, "`"], "`"<>b<>"`","``"<>b<>"``"],
+	Cell[BoxData[TemplateBox[{a_, b_}, "TeXTemplate"]], ___] :> "$$"<>b<>"$$",
+	Cell[BoxData[TemplateBox[{a_, b_}, "InlineTeXTemplate"]], ___] :> "$"<>b<>"$",
+	Cell[BoxData[TemplateBox[{a_, b_}, "HyperlinkTemplate"]], ___] :> "["<>a<>"]("<>b<>")" (* a not a string? *)
+	}
+]&
+
+toHybrid[boxes_] := mergeStrings @ ReplaceAll[boxes,
+	{
+	Cell[BoxData[TemplateBox[{a_, b_}, "SymbolTemplate"]], ___] :> If[StringQ[a], "`"<>a<>"`", Cell[BoxData[a]]],
+	Cell[BoxData[TemplateBox[{a_, b_}, "HyperlinkTemplate"]], ___] :> "["<>a<>"]("<>b<>")" (* a not a string? *)
+	}
+]
+
+mergeStrings = ReplaceAll[#,
+	TextData[a_List] :> TextData[List @@ StringExpression @@ a]
+]&
+
+parseInput = ReplaceAll[#,
+	{
+	Cell[s_String,r___]:>Cell[TextData[List@@parseString[s]],r],
+	TextData[s_String]:>TextData[List@@parseString[s]],
+	TextData[s_List]:>TextData @ Replace[s,
+		{
+		str_String:>Sequence@@parseString[str],
+		Cell[b_,r___] /; !MatchQ[{r}, {"Hyperlink"|"Symbol"|"CodeInput"|"TeXInput"|"InlineTeXInput", ___}] :> Cell[b, "InlineTeXInput"]
+		},
+		{1}
+	]
+	}
+]&
+
+convertInput = ReplaceAll[#,
+	{
+	Cell[s_,"Symbol", ___] :> makeSymbolBox[s],
+	Cell[s_,"CodeInput", ___] :> makeCodeBox[s],
+	Cell[s_,"TeXInput", ___] :> makeTeXBox[s],
+	Cell[s_,"InlineTeXInput", ___] :> makeInlineTeXBox[s],
+	Cell[{label_, link_}, "Hyperlink"] :> makeHyperlinkBox[label,link]
+	}
+]&
+
+makeSymbolBox[BoxData[TemplateBox[{a_, b_}, "SymbolTemplate"]]] := If[StringQ@a,
+	makeSymbolBox[a],
+	makeCodeBox[BoxData[a]]
+]
+makeSymbolBox[s_String] := Replace[
+	refURL[s],
+	{
+		ref_String :> toSymbolCell[s, ref],
+		_ :> toCodeCell[s, s]
+	}
+]
+
+refURL[s_String] := Which[
+	StringMatchQ[s, "Developer`"~~__],
+	"[``"<>s<>"``](http://reference.wolfram.com/language/Developer/ref/"<>StringDrop[s, 10]<>")",
+
+	StringFreeQ[s, "`"] && NameQ[s] && Context[s] === "System`",
+	"[`"<>s<>"`](http://reference.wolfram.com/language/ref/"<>s<>")",
+	
+	_, 
+	$Failed
+]
+
+makeCodeBox[BoxData@TemplateBox[{a_, b_}, "CodeTemplate"]] := If[StringQ[a], makeCodeBox[a], makeCodeBox[BoxData[a]]]
+
+makeCodeBox[s_String] := Which[
+	!SyntaxQ[s], "``"<>s<>"``",
+	NameQ[s], makeSymbolBox[s],
+	True, toCodeCell[s, s]
+]
+makeCodeBox[s_BoxData] := toCodeCell[
+	First @ s,
+	KillLinearSyntax @ First @ FrontEndExecute @ ExportPacket[Cell[s] /. "."->Sequence[" ", ".", " "], "InputText"]
+]
+
+makeTeXBox[s_] := Cell[
+	BoxData @ TemplateBox[
+		toTeX[s],
+		"TeXTemplate"
+	],
+	"TeXInput",
+	TextClipboardType->"InputText"
+]
+
+makeInlineTeXBox[s_] := Cell[
+	BoxData @ TemplateBox[
+		toTeX[s],
+		"InlineTeXTemplate"
+	],
+	"InlineTeXInput",
+	TextClipboardType->"InputText"
+]
+
+makeHyperlinkBox[label_String, link_] := With[{trim = StringTrim[label, "`"..]},
+	With[{ref = refURL[trim]},
+		If[StringQ@ref && StringMatchQ[ref, __~~"("~~StringReplace[link, ".html"~~EndOfString->""]~~")"],
+			toSymbolCell[trim, ref],
+			toHyperlinkCell[trim, link]
+		]
+	]
+]	
+
+toSymbolCell[s_, str_] := Cell[
+	BoxData @ TemplateBox[{s, str}, "SymbolTemplate"],
+	"Symbol",
+	TextClipboardType->"Package"
+]
+
+toCodeCell[s_, str_] := Cell[
+	BoxData @ TemplateBox[{s, str}, "CodeTemplate"],
+	"CodeInput",
+	TextClipboardType->"Package"
+]
+
+toHyperlinkCell[label_, link_] := Cell[
+	BoxData @ TemplateBox[{label, link}, "HyperlinkTemplate"],
+	"Hyperlink",
+	TextClipboardType->"PlainText"
+]
+
+KillLinearSyntax = StringReplace[#, 
+	"\!"~~w__~~"\)" /; SyntaxQ["\!"<>w<>"\)"] :> 
+	ToExpression["\!"<>w<>"\)", InputForm, Function[z, ToString[Unevaluated@z, InputForm], HoldAll]]
+]&
+
+Clear[toTeX]
+toTeX[BoxData @ TemplateBox[{a_, b_}, "TeXTemplate" | "InlineTeXTemplate"]] := toTeX[a]
+toTeX[s_String] := With[
+	{
+	expr = Quiet @ Check[ToExpression[s, TraditionalForm, HoldComplete], $Failed]
+	},
+	If[expr === $Failed,
+		fromTeX[s],
+		{createBoxes@expr, createTeX@expr}
+	]
+]
+toTeX[s_] := With[
+	{
+	expr = Quiet @ Check[ToExpression[s, TraditionalForm, HoldComplete], $Failed]
+	},
+	Which[
+		expr =!= $Failed,
+		{createBoxes@expr, createTeX@expr},
+
+		StringQ[expr],
+		fromTeX[s],
+
+		True,
+		{FrameBox[s, FrameStyle->RGBColor[1,0,0]], $Failed}
+	]
+]
+
+fromTeX[s_] := With[
+	{
+	expr = Quiet @ Check[ToExpression[s, TeXForm, HoldComplete], $Failed]
+	},
+	If[toTeXString[expr] === s,
+		{createBoxes@expr, s},
+		{s, s}
+	]
+]
+toTeXString[HoldComplete[s_]]:=ToString[Unevaluated[s], TeXForm]
+
+createBoxes[HoldComplete[expr_]]:=FormBox[MakeBoxes[expr, TraditionalForm], TraditionalForm]
+createTeX[HoldComplete[expr_]]:=ToString[Unevaluated[expr], TeXForm]
+		
+processInput[expr_] := convertInput @ parseInput @ resetInput @ expr
+
+End[]
+
+EndPackage[]
+
+System`Private`RestoreContextPath[];
