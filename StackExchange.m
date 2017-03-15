@@ -8,6 +8,7 @@ convertInput::usage = "convert parsed input"
 setStyle::usage = "setStyle[cell, style] sets the style of cell"
 seString::usage = "seString returns the StackExchange string version"
 toHybrid::usage = "toHybrid converts a cell to an editable WYSIWYG version"
+InstallStylesheet::usage = "InstallStylesheet[] opens the Stack Exchange style sheet"
 
 $StackExchangeInitialization::usage = "Global variable indicating that the package has been initialized"
 
@@ -212,12 +213,262 @@ fromTeX[s_] := With[
 		{s, s}
 	]
 ]
-toTeXString[HoldComplete[s_]]:=ToString[Unevaluated[s], TeXForm]
+toTeXString[HoldComplete[s_]] := ToString[Unevaluated[s], TeXForm]
 
-createBoxes[HoldComplete[expr_]]:=FormBox[MakeBoxes[expr, TraditionalForm], TraditionalForm]
-createTeX[HoldComplete[expr_]]:=ToString[Unevaluated[expr], TeXForm]
-		
-processInput[expr_] := convertInput @ parseInput @ resetInput @ expr
+createBoxes[HoldComplete[expr_]] := FormBox[MakeBoxes[expr, TraditionalForm], TraditionalForm]
+createTeX[HoldComplete[expr_]] := ToString[Unevaluated[expr], TeXForm]
+
+styleNB = Notebook[
+	{
+	Cell[StyleData[StyleDefinitions->"Default.nb"]],
+	Cell[StyleData["Text"],
+		StyleKeyMapping -> {"Tab" -> "StackExchangeEdit"}
+	],
+	Cell[StyleData["StackExchange", StyleDefinitions->StyleData["Text"]],
+		ContextMenu->{
+			MenuItem[
+				"Show String",
+				FrontEndExecute[{
+					FrontEndToken["SelectNextCell"],
+					SelectionSetStyle[InputNotebook[], "StackExchangeShowExpression"]
+				}]
+			],
+			MenuItem[
+				"Mixed Format",
+				FrontEndExecute[{
+					FrontEndToken["SelectNextCell"],
+					SelectionSetStyle[InputNotebook[], "StackExchangeHybrid"]
+				}]
+			]
+		},
+		StyleKeyMapping -> {
+			"Tab" -> "StackExchangeHybrid",
+			System`KeyEvent["Tab",System`Modifiers->{System`Shift}]->"StackExchangeShowExpression"
+		},
+		CellEditDuplicate->True,
+		DefaultDuplicateCellStyle->"StackExchangeEdit"
+	],
+	Cell[StyleData["StackExchangeEdit", StyleDefinitions->StyleData["Text"]],
+		ContextMenu->{
+			MenuItem[
+				"Format",
+				FrontEndExecute[{
+					FrontEndToken["SelectNextCell"],
+					SelectionSetStyle[InputNotebook[], "StackExchangeFormat"]
+				}]
+			],
+			MenuItem[
+				"Show String",
+				FrontEndExecute[{
+					FrontEndToken["SelectNextCell"],
+					SelectionSetStyle[InputNotebook[], "StackExchangeShowExpression"]
+				}]
+			],
+			MenuItem[
+				"Mixed Format",
+				FrontEndExecute[{
+					FrontEndToken["SelectNextCell"],
+					SelectionSetStyle[InputNotebook[], "StackExchangeHybrid"]
+				}]
+			]
+		},
+		StyleKeyMapping -> {
+			"Tab" -> "StackExchangeFormat",
+			System`KeyEvent["Tab",System`Modifiers->{System`Shift}]->"StackExchangeShowExpression"
+		},
+		CellFrameMargins->0,
+		Background->RGBColor[0.92, 1, 0.92],
+		Evaluatable->True,
+		CellEvaluationFunction->Function[Null, Null],
+		CellProlog :> If[!BooleanQ@StackExchange`$StackExchangeInitialization,
+			Get["StackExchange`"]; 
+			StackExchange`$StackExchangeInitialization = TrueQ@StackExchange`$StackExchangeInitialization
+		],
+		CellEpilog :> If[StackExchange`$StackExchangeInitialization,
+			NotebookWrite[
+				EvaluationCell[],
+				StackExchange`setStyle[
+					StackExchange`convertInput @ StackExchange`parseInput @ NotebookRead[EvaluationCell[]],
+					"StackExchange"
+				],
+				After
+			]
+		]
+	],
+	Cell[StyleData["StackExchangeHybrid", StyleDefinitions->StyleData["Text"]],
+		CellDynamicExpression :> With[{cell = NotebookRead@EvaluationCell[]},
+			If[!BooleanQ@StackExchange`$StackExchangeInitialization,
+				Get["StackExchange`"]; 
+				StackExchange`$StackExchangeInitialization = TrueQ@StackExchange`$StackExchangeInitialization
+			];
+			If[TrueQ@StackExchange`$StackExchangeInitialization,
+				NotebookWrite[EvaluationCell[], Cell[""], All];
+				NotebookWrite[
+					EvaluationNotebook[],
+					StackExchange`setStyle[
+						StackExchange`toHybrid @ cell,
+						"StackExchangeEdit"
+					],
+					All
+				];
+				SelectionMove[EvaluationNotebook[], Before, CellContents],
+				NotebookWrite[EvaluationCell[], Cell[""], All];
+				NotebookWrite[
+					EvaluationCell[],
+					Replace[cell,
+						Cell[a_, _, b__] :>
+						Cell[a, "StackExchange", CellDynamicExpression:>None, b]
+					]
+				]
+			]
+		]
+	],
+	Cell[StyleData["StackExchangeShowExpression", StyleDefinitions->StyleData["Text"]],
+		CellDynamicExpression :> With[{cell = NotebookRead@EvaluationCell[]},
+			If[!BooleanQ@StackExchange`$StackExchangeInitialization,
+				Get["StackExchange`"]; 
+				StackExchange`$StackExchangeInitialization = TrueQ@StackExchange`$StackExchangeInitialization
+			];
+			If[TrueQ@StackExchange`$StackExchangeInitialization,
+				NotebookWrite[EvaluationCell[], Cell[""], All];
+				NotebookWrite[
+					EvaluationNotebook[],
+					StackExchange`setStyle[
+						StackExchange`seString @ cell,
+						"StackExchangeEdit"
+					],
+					All
+				];
+				SelectionMove[EvaluationNotebook[], Before, CellContents],
+				NotebookWrite[EvaluationCell[], Cell[""], All];
+				NotebookWrite[
+					EvaluationCell[],
+					Replace[cell,
+						Cell[a_, _, b__] :>
+						Cell[a, "StackExchange", CellDynamicExpression:>None, b]
+					]
+				]
+			]
+		]
+	],
+	Cell[StyleData["StackExchangeFormat", StyleDefinitions->StyleData["Text"]],
+		CellDynamicExpression :> With[{cell = NotebookRead@EvaluationCell[]},
+			If[!BooleanQ@StackExchange`$StackExchangeInitialization,
+				Get["StackExchange`"]; 
+				StackExchange`$StackExchangeInitialization = TrueQ@StackExchange`$StackExchangeInitialization
+			];
+			If[TrueQ@StackExchange`$StackExchangeInitialization,
+				NotebookWrite[EvaluationCell[], Cell[""], All];
+				NotebookWrite[
+					EvaluationNotebook[],
+					StackExchange`setStyle[
+						StackExchange`convertInput @ StackExchange`parseInput @ cell,
+						"StackExchange"
+					],
+					All
+				];
+				SelectionMove[EvaluationNotebook[], Before, CellContents],
+				NotebookWrite[EvaluationCell[], Cell[""], All];
+				NotebookWrite[
+					EvaluationCell[],
+					Replace[cell,
+						Cell[a_, _, b__] :>
+						Cell[a, "StackExchange", CellDynamicExpression:>None, b]
+					]
+				]
+			]
+		]
+	],
+	Cell[StyleData["HyperlinkTemplate"],
+		TemplateBoxOptions -> {
+			Editable -> True,
+			DisplayFunction -> (DynamicBox[ToBoxes@Hyperlink[#1,#2, BaseStyle->{RGBColor[.64,.22,.35]}]]&),
+			InterpretationFunction -> (Cell[TextData[{"[",#1,"](",#2,")"}]]&)
+		}
+	],
+	Cell[StyleData["SymbolTemplate"],
+		TemplateBoxOptions -> {
+			Editable->True,
+			DisplayFunction->(StyleBox[
+				PaneBox[#,
+					BaselinePosition->Baseline,
+					BaseStyle->{Background->RGBColor[.94,.94,.95]},
+					ImageMargins->2,
+					FrameMargins->{{4,4},{2,2}}
+				],
+				"Text",
+				RGBColor[.64,.22,.35],
+				ShowStringCharacters -> False
+			]&),
+			InterpretationFunction->(Cell[#2]&)
+		}
+	],
+	Cell[StyleData["CodeTemplate"],
+		TemplateBoxOptions -> {
+			Editable->True,
+			DisplayFunction->(StyleBox[
+				PaneBox[TooltipBox[#1, #2, TooltipStyle->{ShowStringCharacters->True}],
+					BaselinePosition->Baseline,
+					BaseStyle->{ShowStringCharacters->True, Background->RGBColor[.94,.94,.95]},
+					ImageMargins->2,
+					FrameMargins->{{4,4},{2,2}}
+				],
+				"Text",
+				ShowStringCharacters -> False
+			]&),
+			InterpretationFunction->(Cell[TextData[{"``", Cell@BoxData@#1, "``"}]]&)
+		}
+	],
+	Cell[StyleData["TeXTemplate"],
+		TemplateBoxOptions -> {
+			Editable->True,
+			DisplayFunction->(FormBox[
+				StyleBox[
+					PaneBox[TooltipBox[#1, #2],
+						BaselinePosition->Baseline,
+						BaseStyle->{Background->RGBColor[1,1,.85,.5]},
+						Alignment->Center,
+						ImageSize->Full,
+						FrameMargins->20
+					],
+					FontFamily->"Times",
+					FontSize->16,
+					ScriptLevel->0,
+					ShowStringCharacters -> False
+				],
+				TraditionalForm
+			]&),
+			InterpretationFunction->(Cell[TextData[{"$$",#2,"$$"}]]&)
+		}
+	],
+	Cell[StyleData["InlineTeXTemplate"],
+		TemplateBoxOptions -> {
+			Editable->True,
+			DisplayFunction->(FormBox[
+				StyleBox[
+					PaneBox[TooltipBox[#1, #2],
+						BaselinePosition->Baseline,
+						BaseStyle->{Background->RGBColor[1,1,.85,.5]},
+						ImageMargins->2,
+						FrameMargins->{{4,4},{2,2}}
+					],
+					FontFamily->"Times",
+					FontSize->16,
+					ScriptLevel->0,
+					ShowStringCharacters -> False
+				],
+				TraditionalForm
+			]&),
+			InterpretationFunction->(Cell[TextData[{"$",#2,"$"}]]&)
+		}
+	]
+	},
+	Saveable->False,WindowSize->{808,689},WindowMargins->{{Automatic,143},{40,Automatic}},
+	FrontEndVersion->"10.3 for Mac OS X x86 (32-bit, 64-bit Kernel) (December 10, 2015)",
+	StyleDefinitions->"PrivateStylesheetFormatting.nb"
+];
+
+InstallStylesheet[] := NotebookPut @ styleNB
 
 End[]
 
