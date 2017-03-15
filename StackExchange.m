@@ -416,7 +416,7 @@ styleNB = Notebook[
 				"Text",
 				ShowStringCharacters -> False
 			]&),
-			InterpretationFunction->(Cell[TextData[{"``", Cell@BoxData@#1, "``"}]]&)
+			InterpretationFunction->(Cell[TextData[{"``", Cell@BoxData@#2, "``"}]]&)
 		}
 	],
 	Cell[StyleData["TeXTemplate"],
