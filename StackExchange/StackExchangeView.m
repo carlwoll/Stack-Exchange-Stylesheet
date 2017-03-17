@@ -1,10 +1,8 @@
-(* ::Package:: *)
-
 BeginPackage["StackExchangeView`", {"StackExchange`"}]
 
 StackExchangeView::usage = "StackExchangeView[url] returns a Mathematica notebook version of url"
 
-Begin["`Private`"] (* Begin Private Context *) 
+Begin["`Private`"]
 
 Options[StackExchangeView] = {Deployed -> False}
 
@@ -185,7 +183,6 @@ postprocessCell[Cell[c_, d__]] := Internal`WithLocalSettings[
 	codeBlock=MemberQ[{d},"CodeBlock"]
 ]
 postprocessCell[c_]:=c
-
 
 (* extract user info *)
 
