@@ -1,6 +1,6 @@
-System`Private`NewContextPath[{"System`"}]
+(* ::Package:: *)
 
-BeginPackage["StackExchange`"]
+BeginPackage["StackExchange`StylesheetFunctions`", {"StackExchange`"}]
 
 parseString::usage = "replace strings with Cell equivalents"
 parseInput::usage = "parse input, possibly including Box structures"
@@ -8,7 +8,8 @@ convertInput::usage = "convert parsed input"
 setStyle::usage = "setStyle[cell, style] sets the style of cell"
 seString::usage = "seString returns the StackExchange string version"
 toHybrid::usage = "toHybrid converts a cell to an editable WYSIWYG version"
-InstallStylesheet::usage = "InstallStylesheet[] opens the Stack Exchange style sheet"
+
+$Stylesheet::usage = "Notebook expression corresponding to the stylesheet"
 
 $StackExchangeInitialization::usage = "Global variable indicating that the package has been initialized"
 
@@ -218,9 +219,23 @@ toTeXString[HoldComplete[s_]] := ToString[Unevaluated[s], TeXForm]
 createBoxes[HoldComplete[expr_]] := FormBox[MakeBoxes[expr, TraditionalForm], TraditionalForm]
 createTeX[HoldComplete[expr_]] := ToString[Unevaluated[expr], TeXForm]
 
-styleNB = Notebook[
+$Stylesheet = Notebook[
 	{
 	Cell[StyleData[StyleDefinitions->"Default.nb"]],
+	Cell[StyleData["Code"],
+		StyleKeyMapping -> {"Tab" -> "CodeBlock"}
+	],
+	Cell[StyleData["CodeBlock", StyleDefinitions->StyleData["Code"]],
+		InitializationCell -> False,
+		StyleKeyMapping -> {"Backspace" -> "Code"},
+		Background -> RGBColor[.94,.94,.95]
+	],
+	Cell[StyleData["CodeBlockOutput", StyleDefinitions->StyleData["Output"]],
+		TextClipboardType->"Package",
+		AutoIndent->True,
+		AutoSpacing->False,
+		Background -> RGBColor[.94,.94,.95]
+	],
 	Cell[StyleData["Text"],
 		StyleKeyMapping -> {"Tab" -> "StackExchangeEdit"}
 	],
@@ -280,15 +295,15 @@ styleNB = Notebook[
 		Background->RGBColor[0.92, 1, 0.92],
 		Evaluatable->True,
 		CellEvaluationFunction->Function[Null, Null],
-		CellProlog :> If[!BooleanQ@StackExchange`$StackExchangeInitialization,
+		CellProlog :> If[!BooleanQ@$StackExchangeInitialization,
 			Get["StackExchange`"]; 
-			StackExchange`$StackExchangeInitialization = TrueQ@StackExchange`$StackExchangeInitialization
+			$StackExchangeInitialization = TrueQ@$StackExchangeInitialization
 		],
-		CellEpilog :> If[StackExchange`$StackExchangeInitialization,
+		CellEpilog :> If[$StackExchangeInitialization,
 			NotebookWrite[
 				EvaluationCell[],
-				StackExchange`setStyle[
-					StackExchange`convertInput @ StackExchange`parseInput @ NotebookRead[EvaluationCell[]],
+				setStyle[
+					convertInput @ parseInput @ NotebookRead[EvaluationCell[]],
 					"StackExchange"
 				],
 				After
@@ -297,16 +312,16 @@ styleNB = Notebook[
 	],
 	Cell[StyleData["StackExchangeHybrid", StyleDefinitions->StyleData["Text"]],
 		CellDynamicExpression :> With[{cell = NotebookRead@EvaluationCell[]},
-			If[!BooleanQ@StackExchange`$StackExchangeInitialization,
+			If[!BooleanQ@$StackExchangeInitialization,
 				Get["StackExchange`"]; 
-				StackExchange`$StackExchangeInitialization = TrueQ@StackExchange`$StackExchangeInitialization
+				$StackExchangeInitialization = TrueQ@$StackExchangeInitialization
 			];
-			If[TrueQ@StackExchange`$StackExchangeInitialization,
+			If[TrueQ@$StackExchangeInitialization,
 				NotebookWrite[EvaluationCell[], Cell[""], All];
 				NotebookWrite[
 					EvaluationNotebook[],
-					StackExchange`setStyle[
-						StackExchange`toHybrid @ cell,
+					setStyle[
+						toHybrid @ cell,
 						"StackExchangeEdit"
 					],
 					All
@@ -325,16 +340,16 @@ styleNB = Notebook[
 	],
 	Cell[StyleData["StackExchangeShowExpression", StyleDefinitions->StyleData["Text"]],
 		CellDynamicExpression :> With[{cell = NotebookRead@EvaluationCell[]},
-			If[!BooleanQ@StackExchange`$StackExchangeInitialization,
+			If[!BooleanQ@$StackExchangeInitialization,
 				Get["StackExchange`"]; 
-				StackExchange`$StackExchangeInitialization = TrueQ@StackExchange`$StackExchangeInitialization
+				$StackExchangeInitialization = TrueQ@$StackExchangeInitialization
 			];
-			If[TrueQ@StackExchange`$StackExchangeInitialization,
+			If[TrueQ@$StackExchangeInitialization,
 				NotebookWrite[EvaluationCell[], Cell[""], All];
 				NotebookWrite[
 					EvaluationNotebook[],
-					StackExchange`setStyle[
-						StackExchange`seString @ cell,
+					setStyle[
+						seString @ cell,
 						"StackExchangeEdit"
 					],
 					All
@@ -353,16 +368,16 @@ styleNB = Notebook[
 	],
 	Cell[StyleData["StackExchangeFormat", StyleDefinitions->StyleData["Text"]],
 		CellDynamicExpression :> With[{cell = NotebookRead@EvaluationCell[]},
-			If[!BooleanQ@StackExchange`$StackExchangeInitialization,
+			If[!BooleanQ@$StackExchangeInitialization,
 				Get["StackExchange`"]; 
-				StackExchange`$StackExchangeInitialization = TrueQ@StackExchange`$StackExchangeInitialization
+				$StackExchangeInitialization = TrueQ@$StackExchangeInitialization
 			];
-			If[TrueQ@StackExchange`$StackExchangeInitialization,
+			If[TrueQ@$StackExchangeInitialization,
 				NotebookWrite[EvaluationCell[], Cell[""], All];
 				NotebookWrite[
 					EvaluationNotebook[],
-					StackExchange`setStyle[
-						StackExchange`convertInput @ StackExchange`parseInput @ cell,
+					setStyle[
+						convertInput @ parseInput @ cell,
 						"StackExchange"
 					],
 					All
@@ -461,17 +476,56 @@ styleNB = Notebook[
 			]&),
 			InterpretationFunction->(Cell[TextData[{"$",#2,"$"}]]&)
 		}
+	],
+	Cell[StyleData["Quote"],
+		Background->RGBColor[1, .98, .89],
+		CellFrame->{{2,0},{0,0}},
+		CellFrameColor->RGBColor[1,.92,.56]
+	],
+	Cell[StyleData["Comment"],
+		CellMargins->{{90, 10}, {10, 5}},
+		FontSize->12
+	],
+	Cell[StyleData["Answer"],
+		CellGroupingRules -> {"SectionGrouping", 70},
+		CellDingbat -> StyleBox["A", FontSize->9],
+		ShowGroupOpener->True,
+		CellFrame -> {{0, 0}, {0, 1}},
+		CellFrameColor->GrayLevel[.9]
+	],
+	Cell[StyleData["AnsweredBy", StyleDefinitions->StyleData["Signature"]],
+		CellFrameLabels->{{None, StyleBox["answered", GrayLevel[.8]]}, {None, None}}
+	],
+	Cell[StyleData["AskedBy", StyleDefinitions->StyleData["Signature"]],
+		CellFrameLabels->{{None, StyleBox["asked", GrayLevel[.8]]}, {None, None}}
+	],
+	Cell[StyleData["EditedBy", StyleDefinitions->StyleData["Signature"]],
+		CellFrameLabels->{{None, StyleBox["edited", GrayLevel[.8]]}, {None, None}}
+	],
+	Cell[StyleData["Community", StyleDefinitions->StyleData["Signature"]],
+		CellFrameLabels->{{None, StyleBox["community", GrayLevel[.8]]}, {None, None}}
+	],
+	Cell[StyleData["Signature", StyleDefinitions->StyleData["Text"]],
+		TextAlignment->Right,
+		ShowStringCharacters->False
+	],
+	Cell[StyleData["HorizontalLine", StyleDefinitions->StyleData["Output"]],
+		Editable->False, Selectable->False,
+		CellFrame->{{0,0},{0,1}},
+		ShowCellBracket->False, CellElementSpacings->{"CellMinHeight"->1},
+		CellFrameMargins->0, CellFrameColor->GrayLevel[.9], CellSize->{Inherited,4}
 	]
 	},
 	Saveable->False,WindowSize->{808,689},WindowMargins->{{Automatic,143},{40,Automatic}},
 	FrontEndVersion->"10.3 for Mac OS X x86 (32-bit, 64-bit Kernel) (December 10, 2015)",
 	StyleDefinitions->"PrivateStylesheetFormatting.nb"
-];
+]
 
-InstallStylesheet[] := NotebookPut @ styleNB
+InstallStylesheet[] := NotebookPut[$Stylesheet]
 
 End[]
 
 EndPackage[]
 
-System`Private`RestoreContextPath[];
+
+
