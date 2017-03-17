@@ -112,86 +112,6 @@ Cell[StyleData["StackExchangeHybrid", StyleDefinitions -> StyleData["Text"]],
       BooleanQ[
       StackExchange`StylesheetFunctions`$StackExchangeInitialization]], 
      Get["StackExchange`"]; 
-     StackExchange`StylesheetFunctions`$StackExchangeInitialization = 
-      TrueQ[StackExchange`StylesheetFunctions`$StackExchangeInitialization]]; 
-   If[
-     TrueQ[StackExchange`StylesheetFunctions`$StackExchangeInitialization], 
-     NotebookWrite[
-       EvaluationCell[], 
-       Cell[""], All]; NotebookWrite[
-       EvaluationNotebook[], 
-       StackExchange`StylesheetFunctions`setStyle[
-        StackExchange`StylesheetFunctions`toHybrid[
-        StackExchange`StylesheetFunctions`Private`cell], "StackExchangeEdit"],
-        All]; SelectionMove[
-       EvaluationNotebook[], Before, CellContents], NotebookWrite[
-       EvaluationCell[], 
-       Cell[""], All]; NotebookWrite[
-       EvaluationCell[], 
-       Replace[StackExchange`StylesheetFunctions`Private`cell, Cell[
-          Pattern[StackExchange`StylesheetFunctions`Private`a, 
-           Blank[]], 
-          Blank[], 
-          Pattern[StackExchange`StylesheetFunctions`Private`b, 
-           BlankSequence[]]] :> 
-        Cell[StackExchange`StylesheetFunctions`Private`a, "StackExchange", 
-          CellDynamicExpression :> None, 
-          StackExchange`StylesheetFunctions`Private`b]]]]]],
-
-Cell[StyleData["StackExchangeShowExpression", StyleDefinitions -> StyleData[
- "Text"]],
- CellDynamicExpression:>
-  With[{StackExchange`StylesheetFunctions`Private`cell = NotebookRead[
-      EvaluationCell[]]}, If[
-     Not[
-      BooleanQ[
-      StackExchange`StylesheetFunctions`$StackExchangeInitialization]], 
-     Get["StackExchange`"]; 
-     StackExchange`StylesheetFunctions`$StackExchangeInitialization = 
-      TrueQ[StackExchange`StylesheetFunctions`$StackExchangeInitialization]]; 
-   If[
-     TrueQ[StackExchange`StylesheetFunctions`$StackExchangeInitialization], 
-     NotebookWrite[
-       EvaluationCell[], 
-       Cell[""], All]; NotebookWrite[
-       EvaluationNotebook[], 
-       StackExchange`StylesheetFunctions`setStyle[
-        StackExchange`StylesheetFunctions`seString[
-        StackExchange`StylesheetFunctions`Private`cell], "StackExchangeEdit"],
-        All]; SelectionMove[
-       EvaluationNotebook[], Before, CellContents], NotebookWrite[
-       EvaluationCell[], 
-       Cell[""], All]; NotebookWrite[
-       EvaluationCell[], 
-       Replace[StackExchange`StylesheetFunctions`Private`cell, Cell[
-          Pattern[StackExchange`StylesheetFunctions`Private`a, 
-           Blank[]], 
-          Blank[], 
-          Pattern[StackExchange`StylesheetFunctions`Private`b, 
-           BlankSequence[]]] :> 
-        Cell[StackExchange`StylesheetFunctions`Private`a, "StackExchange", 
-          CellDynamicExpression :> None, 
-          StackExchange`StylesheetFunctions`Private`b]]]]]],
-
-Cell[StyleData["StackExchangeFormat", StyleDefinitions -> StyleData["Text"]],
- CellDynamicExpression:>
-  With[{StackExchange`StylesheetFunctions`Private`cell = NotebookRead[
-      EvaluationCell[]]}, If[
-     Not[
-      BooleanQ[
-      StackExchange`StylesheetFunctions`$StackExchangeInitialization]], 
-     Get["StackExchange`"]; 
-     StackExchange`StylesheetFunctions`$StackExchangeInitialization = 
-      TrueQ[StackExchange`StylesheetFunctions`$StackExchangeInitialization]]; 
-   If[
-     TrueQ[StackExchange`StylesheetFunctions`$StackExchangeInitialization], 
-     NotebookWrite[
-       EvaluationCell[], 
-       Cell[""], All]; NotebookWrite[
-       EvaluationNotebook[], 
-       StackExchange`StylesheetFunctions`setStyle[
-        StackExchange`StylesheetFunctions`convertInput[
-         StackExchange`StylesheetFunctions`parseInput[
          StackExchange`StylesheetFunctions`Private`cell]], "StackExchange"], 
        All]; SelectionMove[
        EvaluationNotebook[], Before, CellContents], NotebookWrite[
@@ -370,4 +290,3 @@ Cell[11334, 309, 293, 8, 70, 74, 0, "StyleData", "HorizontalLine", "All"]
 *)
 
 (* End of internal cache information *)
-
