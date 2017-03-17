@@ -222,6 +222,15 @@ createTeX[HoldComplete[expr_]] := ToString[Unevaluated[expr], TeXForm]
 $Stylesheet = Notebook[
 	{
 	Cell[StyleData[StyleDefinitions->"Default.nb"]],
+	Cell[StyleData["Notebook"],
+		ShowCellLabel->False
+	],
+	Cell[StyleData["Input"],
+		ShowCellLabel->True
+	],
+	Cell[StyleData["Output"],
+		ShowCellLabel->True
+	],
 	Cell[StyleData["Code"],
 		StyleKeyMapping -> {"Tab" -> "CodeBlock"}
 	],
@@ -526,6 +535,3 @@ InstallStylesheet[] := NotebookPut[$Stylesheet]
 End[]
 
 EndPackage[]
-
-
-
