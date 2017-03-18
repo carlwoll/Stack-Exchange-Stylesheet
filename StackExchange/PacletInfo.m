@@ -1,6 +1,6 @@
 Paclet[
 	Name -> "StackExchange",
-	Version -> "0.0.1",
+	Version -> "0.0.2",
 	MathematicaVersion -> "10.0+",
 	Description -> "Support WL <-> StackExchange transfer",
 	Creator -> "Carl Woll",
