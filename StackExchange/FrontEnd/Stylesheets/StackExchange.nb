@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       158,          7]
-NotebookDataLength[     13813,        363]
-NotebookOptionsPosition[     11631,        319]
-NotebookOutlinePosition[     12025,        336]
-CellTagsIndexPosition[     11982,        333]
+NotebookDataLength[     14044,        369]
+NotebookOptionsPosition[     11789,        324]
+NotebookOutlinePosition[     12182,        341]
+CellTagsIndexPosition[     12139,        338]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -267,6 +267,11 @@ Cell[StyleData["InlineTeXTemplate"],
  InterpretationFunction->(Cell[
    TextData[{"$", #2, "$"}]]& )}],
 
+Cell[StyleData["ImageTemplate"],
+ TemplateBoxOptions->{DisplayFunction->(#& ),
+ InterpretationFunction->(Cell[
+   TextData[{"![", #3, "](", #2, ")"}]]& )}],
+
 Cell[StyleData["Quote"],
  CellFrame->{{2, 0}, {0, 0}},
  CellFrameColor->RGBColor[1, 0.92, 0.56],
@@ -317,7 +322,7 @@ Cell[StyleData["HorizontalLine", StyleDefinitions -> StyleData["Output"]],
  CellFrameColor->GrayLevel[0.9],
  CellSize->{Inherited, 4}]
 },
-Saveable->False,
+Saveable->True,
 WindowSize->{808, 689},
 WindowMargins->{{Automatic, 143}, {40, Automatic}},
 FrontEndVersion->"11.1 for Mac OS X x86 (32-bit, 64-bit Kernel) (January 4, \
@@ -351,23 +356,22 @@ Cell[4906, 140, 1507, 33, 46, 87, 1, "StyleData", \
 "StackExchangeShowExpression", "All"],
 Cell[6416, 175, 1554, 33, 46, 77, 0, "StyleData", "StackExchangeFormat", \
 "All"],
-Cell[7973, 210, 270, 7, 70, 36, 0, "StyleData", "HyperlinkTemplate", "All"],
-Cell[8246, 219, 380, 7, 70, 33, 0, "StyleData", "SymbolTemplate", "All"],
-Cell[8629, 228, 516, 13, 70, 31, 0, "StyleData", "CodeTemplate", "All"],
-Cell[9148, 243, 492, 11, 70, 30, 0, "StyleData", "TeXTemplate", "All"],
-Cell[9643, 256, 487, 11, 70, 36, 0, "StyleData", "InlineTeXTemplate", "All"],
-Cell[10133, 269, 134, 3, 70, 24, 0, "StyleData", "Quote", "All"],
-Cell[10270, 274, 76, 2, 70, 26, 0, "StyleData", "Comment", "All"],
-Cell[10349, 278, 201, 5, 70, 25, 0, "StyleData", "Answer", "All"],
-Cell[10553, 285, 164, 3, 70, 73, 0, "StyleData", "AnsweredBy", "All"],
-Cell[10720, 290, 158, 3, 70, 70, 0, "StyleData", "AskedBy", "All"],
-Cell[10881, 295, 160, 3, 70, 71, 0, "StyleData", "EditedBy", "All"],
-Cell[11044, 300, 164, 3, 70, 72, 0, "StyleData", "Community", "All"],
-Cell[11211, 305, 120, 2, 70, 67, 0, "StyleData", "Signature", "All"],
-Cell[11334, 309, 293, 8, 70, 74, 0, "StyleData", "HorizontalLine", "All"]
+Cell[7973, 210, 270, 7, 36, 36, 0, "StyleData", "HyperlinkTemplate", "All"],
+Cell[8246, 219, 380, 7, 36, 33, 0, "StyleData", "SymbolTemplate", "All"],
+Cell[8629, 228, 516, 13, 36, 31, 0, "StyleData", "CodeTemplate", "All"],
+Cell[9148, 243, 492, 11, 36, 30, 0, "StyleData", "TeXTemplate", "All"],
+Cell[9643, 256, 487, 11, 36, 36, 0, "StyleData", "InlineTeXTemplate", "All"],
+Cell[10133, 269, 155, 3, 36, 32, 0, "StyleData", "ImageTemplate", "All"],
+Cell[10291, 274, 134, 3, 52, 24, 0, "StyleData", "Quote", "All"],
+Cell[10428, 279, 76, 2, 43, 26, 0, "StyleData", "Comment", "All"],
+Cell[10507, 283, 201, 5, 45, 25, 0, "StyleData", "Answer", "All"],
+Cell[10711, 290, 164, 3, 43, 73, 0, "StyleData", "AnsweredBy", "All"],
+Cell[10878, 295, 158, 3, 46, 70, 0, "StyleData", "AskedBy", "All"],
+Cell[11039, 300, 160, 3, 46, 71, 0, "StyleData", "EditedBy", "All"],
+Cell[11202, 305, 164, 3, 46, 72, 0, "StyleData", "Community", "All"],
+Cell[11369, 310, 120, 2, 46, 67, 0, "StyleData", "Signature", "All"],
+Cell[11492, 314, 293, 8, 20, 74, 0, "StyleData", "HorizontalLine", "All"]
 }
 ]
 *)
-
-(* End of internal cache information *)
 
