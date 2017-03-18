@@ -1,3 +1,5 @@
+(* ::Package:: *)
+
 BeginPackage["StackExchangeView`", {"StackExchange`"}]
 
 StackExchangeView::usage = "StackExchangeView[url] returns a Mathematica notebook version of url"
@@ -18,7 +20,7 @@ StackExchangeView[link_] := Notebook[postprocessCell /@ Flatten @ Last @ Reap @
 			Infinity
 		];
 	],
-	Options[EvaluationNotebook[], StyleDefinitions]
+	StyleDefinitions->"StackExchange.nb"
 ]
 
 (* extract title *)
@@ -70,7 +72,7 @@ iXML[q_, t_] := Block[{first},
 		first:=(first=Automatic; "Answer")
 	];
 
-	ReplaceAll[q, x:XMLElement[type:"p"|"pre"|"blockquote", __] :> bodyXML[x, first]]
+	ReplaceAll[q, x:XMLElement[type:"p"|"pre"|"blockquote"|"ul"|"ol"|"hr"|"h1"|"h2"|"h3", __] :> bodyXML[x, first]]
 ]
 
 bodyXML[q_, style_:Automatic] := Block[
@@ -94,6 +96,7 @@ bodyXML[q_, style_:Automatic] := Block[
 ]
 
 (* XMLToString converts XMLElements to Text/StackExchange and Input/Output cells as appropriate *)
+Clear[XMLToString]
 
 (* signature of an Input cell *)
 XMLToString["pre", {}, s_] := Replace[
@@ -102,36 +105,89 @@ XMLToString["pre", {}, s_] := Replace[
 ]
 
 (* signature of an inline cell *)
-XMLToString["code",{}, {s_String}] := If[StringFreeQ[s,"`"], "`"<>s<>"`", "``"<>s<>"``"]
+XMLToString["code",{}, {s_String}] := Which[
+	!StringFreeQ[s, "``"], "``` "<>s<>" ```",
+	!StringFreeQ[s, "`"], "`` "<>s<>" ``",
+	True, "`"<>s<>"`"
+]
 
 (* signature of an ordinary paragraph *)
-XMLToString["p", {}, s_] := Cell[TextData[s], "StackExchange"]
+XMLToString["p", {}, s_] := s
 
 (* signature of an image *)
 XMLToString["p", {}, {s_BoxData}] := Cell[s, "Output"]
 
 (* signature of a blockquote *)
-XMLToString["blockquote", {}, s_] := Replace[stripWhitespace[s],
-	{
-	{Cell[t_,u__]} :> Cell[t, "Quote", u], (* probably an image *)
-	{t__} :> Cell[TextData[t], "Quote", "StackExchange"]
-	}
+XMLToString["blockquote", {}, s_] := Cell[
+	TextData[trim @ augment[s]],
+	"Quote",
+	"StackExchange"
 ]
 
-(* signature of bold text *)
-XMLToString["strong",{},{s__String}]:=StringJoin["**", s, "**"]
+XMLToString["hr", {}, {}] := grayLine[]
 
-(* not sure? *)
-XMLToString["a",_, {x_}]:=x
+(* headers *)
+XMLToString["h1", {}, s_] := augment["<h1>", s, "</h1>"]
+
+XMLToString["h2", {}, s_] := augment["<h2>", s, "</h2>"]
+
+XMLToString["h3", {}, s_] := augment["<h3>", s, "</h3>"]
+
+(* signature of emphasized text *)
+XMLToString["em", {}, s_] := augment["*", s, "*"]
+
+(* signature of bold text *)
+XMLToString["strong", {}, s_] := augment["**", s, "**"]
+
+(* links *)
+XMLToString["a", rules_, s_] := With[{link = "href"/.rules},
+	Which[
+		!StringQ[link] || !StringMatchQ[link, "http"~~__],
+		augment[s],
+
+		StringMatchQ[link, __~~".png"], 
+		If[MatchQ[s, {Cell[BoxData[TemplateBox[_, "ImageTemplate"]], __]}],
+			First @ s,
+			XMLToString["img", "src"->link, {}]
+		],
+
+		True,
+		augment["[", s, "](", link, ")"]
+	]
+]
+
+XMLToString["li", {}, s_] := augment["* ", s, "\n\n"]
 
 (* signature of an image *)
-XMLToString["img",rules_,_] := Cell[BoxData@ToBoxes@Import["src"/.rules], "Output"]
+XMLToString["img",rules_,_] := Cell[
+	BoxData@TemplateBox[
+		{
+		ToBoxes@Import["src"/.rules],
+		"src"/.rules,
+		"alt"/.rules
+		},
+		"ImageTemplate"
+	],
+	"Output"
+]
 
 (* signature of a comment *)
 XMLToString["span", {"class"->"comment-copy",___}, q_] := XMLToString["p", {}, q]
 
+(* bullets *)
+XMLToString["ul", {}, s_] := trim @ augment[s]
+
+(* numbered list *)
+XMLToString["ol", {}, s_] := trim @ augment @ MapIndexed[
+	toNumber[#1, #2[[1]]]&,
+	s
+]
+
+toNumber[s_String, index_] := StringReplace[s, StartOfString~~"*" :> ToString[index]<>"."]
+toNumber[{s_String, t___}, index_] := {toNumber[s, index], t}
+
 (* all others *)
-XMLToString[a__]:=Sequence[]
+XMLToString[a__] := Sequence[]
 
 (* a horizontal separator line *)
 grayLine[] := Cell[
@@ -141,6 +197,7 @@ grayLine[] := Cell[
 ]
 
 (* remove superfluous cell wrappers *)
+stripWrappers[{c_Cell}] := stripWrappers[c]
 stripWrappers[Cell[c_, opts___]] := Cell[
 	ReplaceRepeated[
 		c,
@@ -151,11 +208,33 @@ stripWrappers[Cell[c_, opts___]] := Cell[
 	],
 	opts
 ]
+stripWrappers[c_] := c
+stripWrappers[] = ""
 
 (* whitespace *)
 stripWhitespace[s_String] := StringTrim[s]
 stripWhitespace[s_] := s
 stripWhitespace[s_List] := DeleteCases[stripWhitespace /@ s, ""]
+
+(* augment "TextData" objects *)
+augment[s__] := iaugment @ Flatten[{s}]
+
+iaugment[s_List] := List @@ StringExpression @@ Replace[s,
+	{a___, b_String /; !StringFreeQ[b, "[]("], c_, d___} :> 
+	{a, StringReplace[b, x___~~"[](" :> StringExpression[x, "[", c, "]("]], d}
+]
+
+trim[s_] := Replace[s,
+	{
+		{b_, m___, e_} :> 
+			{
+			If[StringQ@b, StringReplace[b, StartOfString~~Whitespace~~t___ -> t], b],
+			m,
+			If[StringQ@e, StringReplace[e, t___~~Whitespace~~EndOfString -> t], e]
+			},
+		b_String | {b_String} :> StringTrim[b, Whitespace]
+	}
+]
 
 (* remove superfluous cell wrappers, and convert blockquote cells into "Output" cells when they follow an "Input" cell *)
 postprocessCell[Cell[c_, "Quote", r___]] := Internal`WithLocalSettings[

@@ -486,6 +486,12 @@ $Stylesheet = Notebook[
 			InterpretationFunction->(Cell[TextData[{"$",#2,"$"}]]&)
 		}
 	],
+	Cell[StyleData["ImageTemplate"],
+		TemplateBoxOptions -> {
+			DisplayFunction -> (#1&),
+			InterpretationFunction -> (Cell[TextData[{"![", #3, "](", #2, ")"}]]&)
+		}
+	],
 	Cell[StyleData["Quote"],
 		Background->RGBColor[1, .98, .89],
 		CellFrame->{{2,0},{0,0}},
