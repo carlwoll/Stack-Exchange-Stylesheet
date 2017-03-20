@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       158,          7]
-NotebookDataLength[     14044,        369]
-NotebookOptionsPosition[     11789,        324]
-NotebookOutlinePosition[     12182,        341]
-CellTagsIndexPosition[     12139,        338]
+NotebookDataLength[     14893,        369]
+NotebookOptionsPosition[     12634,        323]
+NotebookOutlinePosition[     13028,        340]
+CellTagsIndexPosition[     12985,        337]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -107,106 +107,105 @@ Cell[StyleData["StackExchangeEdit", StyleDefinitions -> StyleData["Text"]],
 Cell[StyleData["StackExchangeHybrid", StyleDefinitions -> StyleData["Text"]],
  CellDynamicExpression:>
   With[{StackExchange`StylesheetFunctions`Private`cell = NotebookRead[
-      EvaluationCell[]]}, If[
+      EvaluationCell[]]}, SetOptions[
+     EvaluationCell[], CellDynamicExpression -> None]; If[
      Not[
       BooleanQ[
       StackExchange`StylesheetFunctions`$StackExchangeInitialization]], 
      Get["StackExchange`"]; 
      StackExchange`StylesheetFunctions`$StackExchangeInitialization = 
       TrueQ[StackExchange`StylesheetFunctions`$StackExchangeInitialization]]; 
-   If[
-     TrueQ[StackExchange`StylesheetFunctions`$StackExchangeInitialization], 
-     NotebookWrite[
-       EvaluationCell[], 
-       Cell[""], All]; NotebookWrite[
-       EvaluationNotebook[], 
-       StackExchange`StylesheetFunctions`setStyle[
-        StackExchange`StylesheetFunctions`toHybrid[
-        StackExchange`StylesheetFunctions`Private`cell], "StackExchangeEdit"],
-        All]; SelectionMove[
-       EvaluationNotebook[], Before, CellContents], NotebookWrite[
-       EvaluationCell[], 
-       Cell[""], All]; NotebookWrite[
-       EvaluationCell[], 
-       Replace[StackExchange`StylesheetFunctions`Private`cell, Cell[
+   With[{StackExchange`StylesheetFunctions`Private`old = 
+      Replace[StackExchange`StylesheetFunctions`Private`cell, Cell[
           Pattern[StackExchange`StylesheetFunctions`Private`a, 
-           Blank[]], 
-          Blank[], 
+           BlankSequence[]], "StackExchangeHybrid", 
           Pattern[StackExchange`StylesheetFunctions`Private`b, 
-           BlankSequence[]]] :> 
+           BlankNullSequence[]]] :> 
         Cell[StackExchange`StylesheetFunctions`Private`a, "StackExchange", 
-          CellDynamicExpression :> None, 
-          StackExchange`StylesheetFunctions`Private`b]]]]]],
+          StackExchange`StylesheetFunctions`Private`b]], 
+      StackExchange`StylesheetFunctions`Private`new = 
+      StackExchange`StylesheetFunctions`setStyle[
+        StackExchange`StylesheetFunctions`toHybrid[
+        StackExchange`StylesheetFunctions`Private`cell], 
+        "StackExchangeEdit"]}, 
+     Replace[StackExchange`StylesheetFunctions`Private`new, {
+       Pattern[StackExchange`StylesheetFunctions`Private`c, 
+          Blank[Cell]] :> NotebookWrite[
+          EvaluationCell[], StackExchange`StylesheetFunctions`Private`c, All],
+         Pattern[StackExchange`StylesheetFunctions`Private`o, 
+          Blank[]] :> NotebookWrite[
+          EvaluationCell[], StackExchange`StylesheetFunctions`Private`old, 
+          All]}]; SelectionMove[
+       EvaluationNotebook[], Before, CellContents]]]],
 
 Cell[StyleData["StackExchangeShowExpression", StyleDefinitions -> StyleData[
  "Text"]],
  CellDynamicExpression:>
   With[{StackExchange`StylesheetFunctions`Private`cell = NotebookRead[
-      EvaluationCell[]]}, If[
+      EvaluationCell[]]}, SetOptions[
+     EvaluationCell[], CellDynamicExpression -> None]; If[
      Not[
       BooleanQ[
       StackExchange`StylesheetFunctions`$StackExchangeInitialization]], 
      Get["StackExchange`"]; 
      StackExchange`StylesheetFunctions`$StackExchangeInitialization = 
       TrueQ[StackExchange`StylesheetFunctions`$StackExchangeInitialization]]; 
-   If[
-     TrueQ[StackExchange`StylesheetFunctions`$StackExchangeInitialization], 
-     NotebookWrite[
-       EvaluationCell[], 
-       Cell[""], All]; NotebookWrite[
-       EvaluationNotebook[], 
-       StackExchange`StylesheetFunctions`setStyle[
-        StackExchange`StylesheetFunctions`seString[
-        StackExchange`StylesheetFunctions`Private`cell], "StackExchangeEdit"],
-        All]; SelectionMove[
-       EvaluationNotebook[], Before, CellContents], NotebookWrite[
-       EvaluationCell[], 
-       Cell[""], All]; NotebookWrite[
-       EvaluationCell[], 
-       Replace[StackExchange`StylesheetFunctions`Private`cell, Cell[
+   With[{StackExchange`StylesheetFunctions`Private`old = 
+      Replace[StackExchange`StylesheetFunctions`Private`cell, Cell[
           Pattern[StackExchange`StylesheetFunctions`Private`a, 
-           Blank[]], 
-          Blank[], 
+           BlankSequence[]], "StackExchangeShowExpression", 
           Pattern[StackExchange`StylesheetFunctions`Private`b, 
-           BlankSequence[]]] :> 
+           BlankNullSequence[]]] :> 
         Cell[StackExchange`StylesheetFunctions`Private`a, "StackExchange", 
-          CellDynamicExpression :> None, 
-          StackExchange`StylesheetFunctions`Private`b]]]]]],
+          StackExchange`StylesheetFunctions`Private`b]], 
+      StackExchange`StylesheetFunctions`Private`new = 
+      StackExchange`StylesheetFunctions`setStyle[
+        StackExchange`StylesheetFunctions`seString[
+        StackExchange`StylesheetFunctions`Private`cell], 
+        "StackExchangeEdit"]}, 
+     Replace[StackExchange`StylesheetFunctions`Private`new, {
+       Pattern[StackExchange`StylesheetFunctions`Private`c, 
+          Blank[Cell]] :> NotebookWrite[
+          EvaluationCell[], StackExchange`StylesheetFunctions`Private`c, All],
+         Pattern[StackExchange`StylesheetFunctions`Private`o, 
+          Blank[]] :> NotebookWrite[
+          EvaluationCell[], StackExchange`StylesheetFunctions`Private`old, 
+          All]}]; SelectionMove[
+       EvaluationNotebook[], Before, CellContents]]]],
 
 Cell[StyleData["StackExchangeFormat", StyleDefinitions -> StyleData["Text"]],
  CellDynamicExpression:>
   With[{StackExchange`StylesheetFunctions`Private`cell = NotebookRead[
-      EvaluationCell[]]}, If[
+      EvaluationCell[]]}, SetOptions[
+     EvaluationCell[], CellDynamicExpression -> None]; If[
      Not[
       BooleanQ[
       StackExchange`StylesheetFunctions`$StackExchangeInitialization]], 
      Get["StackExchange`"]; 
      StackExchange`StylesheetFunctions`$StackExchangeInitialization = 
       TrueQ[StackExchange`StylesheetFunctions`$StackExchangeInitialization]]; 
-   If[
-     TrueQ[StackExchange`StylesheetFunctions`$StackExchangeInitialization], 
-     NotebookWrite[
-       EvaluationCell[], 
-       Cell[""], All]; NotebookWrite[
-       EvaluationNotebook[], 
-       StackExchange`StylesheetFunctions`setStyle[
+   With[{StackExchange`StylesheetFunctions`Private`old = 
+      Replace[StackExchange`StylesheetFunctions`Private`cell, Cell[
+          Pattern[StackExchange`StylesheetFunctions`Private`a, 
+           BlankSequence[]], "StackExchangeFormat", 
+          Pattern[StackExchange`StylesheetFunctions`Private`b, 
+           BlankNullSequence[]]] :> 
+        Cell[StackExchange`StylesheetFunctions`Private`a, "StackExchange", 
+          StackExchange`StylesheetFunctions`Private`b]], 
+      StackExchange`StylesheetFunctions`Private`new = 
+      StackExchange`StylesheetFunctions`setStyle[
         StackExchange`StylesheetFunctions`convertInput[
          StackExchange`StylesheetFunctions`parseInput[
-         StackExchange`StylesheetFunctions`Private`cell]], "StackExchange"], 
-       All]; SelectionMove[
-       EvaluationNotebook[], Before, CellContents], NotebookWrite[
-       EvaluationCell[], 
-       Cell[""], All]; NotebookWrite[
-       EvaluationCell[], 
-       Replace[StackExchange`StylesheetFunctions`Private`cell, Cell[
-          Pattern[StackExchange`StylesheetFunctions`Private`a, 
-           Blank[]], 
-          Blank[], 
-          Pattern[StackExchange`StylesheetFunctions`Private`b, 
-           BlankSequence[]]] :> 
-        Cell[StackExchange`StylesheetFunctions`Private`a, "StackExchange", 
-          CellDynamicExpression :> None, 
-          StackExchange`StylesheetFunctions`Private`b]]]]]],
+         StackExchange`StylesheetFunctions`Private`cell]], "StackExchange"]}, 
+     Replace[StackExchange`StylesheetFunctions`Private`new, {
+       Pattern[StackExchange`StylesheetFunctions`Private`c, 
+          Blank[Cell]] :> NotebookWrite[
+          EvaluationCell[], StackExchange`StylesheetFunctions`Private`c, All],
+         Pattern[StackExchange`StylesheetFunctions`Private`o, 
+          Blank[]] :> NotebookWrite[
+          EvaluationCell[], StackExchange`StylesheetFunctions`Private`old, 
+          All]}]; SelectionMove[
+       EvaluationNotebook[], Before, CellContents]]]],
 
 Cell[StyleData["HyperlinkTemplate"],
  TemplateBoxOptions->{DisplayFunction->(DynamicBox[
@@ -322,7 +321,7 @@ Cell[StyleData["HorizontalLine", StyleDefinitions -> StyleData["Output"]],
  CellFrameColor->GrayLevel[0.9],
  CellSize->{Inherited, 4}]
 },
-Saveable->True,
+Saveable->False,
 WindowSize->{808, 689},
 WindowMargins->{{Automatic, 143}, {40, Automatic}},
 FrontEndVersion->"11.1 for Mac OS X x86 (32-bit, 64-bit Kernel) (January 4, \
@@ -350,28 +349,31 @@ Cell[1012, 39, 187, 4, 60, 75, 0, "StyleData", "CodeBlockOutput", "All"],
 Cell[1202, 45, 73, 1, 46, 23, 0, "StyleData", "Text", "All"],
 Cell[1278, 48, 636, 16, 46, 71, 0, "StyleData", "StackExchange", "All"],
 Cell[1917, 66, 1486, 38, 46, 75, 0, "StyleData", "StackExchangeEdit", "All"],
-Cell[3406, 106, 1497, 32, 46, 77, 0, "StyleData", "StackExchangeHybrid", \
+Cell[3406, 106, 1779, 32, 46, 77, 0, "StyleData", "StackExchangeHybrid", \
 "All"],
-Cell[4906, 140, 1507, 33, 46, 87, 1, "StyleData", \
+Cell[5188, 140, 1797, 33, 46, 87, 1, "StyleData", \
 "StackExchangeShowExpression", "All"],
-Cell[6416, 175, 1554, 33, 46, 77, 0, "StyleData", "StackExchangeFormat", \
+Cell[6988, 175, 1827, 32, 46, 77, 0, "StyleData", "StackExchangeFormat", \
 "All"],
-Cell[7973, 210, 270, 7, 36, 36, 0, "StyleData", "HyperlinkTemplate", "All"],
-Cell[8246, 219, 380, 7, 36, 33, 0, "StyleData", "SymbolTemplate", "All"],
-Cell[8629, 228, 516, 13, 36, 31, 0, "StyleData", "CodeTemplate", "All"],
-Cell[9148, 243, 492, 11, 36, 30, 0, "StyleData", "TeXTemplate", "All"],
-Cell[9643, 256, 487, 11, 36, 36, 0, "StyleData", "InlineTeXTemplate", "All"],
-Cell[10133, 269, 155, 3, 36, 32, 0, "StyleData", "ImageTemplate", "All"],
-Cell[10291, 274, 134, 3, 52, 24, 0, "StyleData", "Quote", "All"],
-Cell[10428, 279, 76, 2, 43, 26, 0, "StyleData", "Comment", "All"],
-Cell[10507, 283, 201, 5, 45, 25, 0, "StyleData", "Answer", "All"],
-Cell[10711, 290, 164, 3, 43, 73, 0, "StyleData", "AnsweredBy", "All"],
-Cell[10878, 295, 158, 3, 46, 70, 0, "StyleData", "AskedBy", "All"],
-Cell[11039, 300, 160, 3, 46, 71, 0, "StyleData", "EditedBy", "All"],
-Cell[11202, 305, 164, 3, 46, 72, 0, "StyleData", "Community", "All"],
-Cell[11369, 310, 120, 2, 46, 67, 0, "StyleData", "Signature", "All"],
-Cell[11492, 314, 293, 8, 20, 74, 0, "StyleData", "HorizontalLine", "All"]
+Cell[8818, 209, 270, 7, 70, 36, 0, "StyleData", "HyperlinkTemplate", "All"],
+Cell[9091, 218, 380, 7, 70, 33, 0, "StyleData", "SymbolTemplate", "All"],
+Cell[9474, 227, 516, 13, 70, 31, 0, "StyleData", "CodeTemplate", "All"],
+Cell[9993, 242, 492, 11, 70, 30, 0, "StyleData", "TeXTemplate", "All"],
+Cell[10488, 255, 487, 11, 70, 36, 0, "StyleData", "InlineTeXTemplate", \
+"All"],
+Cell[10978, 268, 155, 3, 70, 32, 0, "StyleData", "ImageTemplate", "All"],
+Cell[11136, 273, 134, 3, 70, 24, 0, "StyleData", "Quote", "All"],
+Cell[11273, 278, 76, 2, 70, 26, 0, "StyleData", "Comment", "All"],
+Cell[11352, 282, 201, 5, 70, 25, 0, "StyleData", "Answer", "All"],
+Cell[11556, 289, 164, 3, 70, 73, 0, "StyleData", "AnsweredBy", "All"],
+Cell[11723, 294, 158, 3, 70, 70, 0, "StyleData", "AskedBy", "All"],
+Cell[11884, 299, 160, 3, 70, 71, 0, "StyleData", "EditedBy", "All"],
+Cell[12047, 304, 164, 3, 70, 72, 0, "StyleData", "Community", "All"],
+Cell[12214, 309, 120, 2, 70, 67, 0, "StyleData", "Signature", "All"],
+Cell[12337, 313, 293, 8, 70, 74, 0, "StyleData", "HorizontalLine", "All"]
 }
 ]
 *)
+
+(* End of internal cache information *)
 
