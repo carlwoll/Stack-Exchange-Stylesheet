@@ -323,63 +323,70 @@ $Stylesheet = Notebook[
 	],
 	Cell[StyleData["StackExchangeHybrid", StyleDefinitions->StyleData["Text"]],
 		CellDynamicExpression :> With[{cell = NotebookRead@EvaluationCell[]},
+			SetOptions[EvaluationCell[], CellDynamicExpression->None];
 			If[!BooleanQ@$StackExchangeInitialization,
 				Get["StackExchange`"]; 
 				$StackExchangeInitialization = TrueQ@$StackExchangeInitialization
 			];
-			If[TrueQ@$StackExchangeInitialization,
-				NotebookWrite[EvaluationCell[], Cell[""], All];
-				NotebookWrite[
-					EvaluationNotebook[],
-					setStyle[
-						toHybrid @ cell,
-						"StackExchangeEdit"
-					],
-					All
-				];
-				SelectionMove[EvaluationNotebook[], Before, CellContents],
-				NotebookWrite[EvaluationCell[], Cell[""], All];
-				NotebookWrite[
-					EvaluationCell[],
-					Replace[cell,
-						Cell[a_, _, b__] :>
-						Cell[a, "StackExchange", CellDynamicExpression:>None, b]
-					]
+
+			With[
+				{
+				old = Replace[cell,
+					Cell[a__, "StackExchangeHybrid", b___] :> Cell[a, "StackExchange", b]
+				],
+				new = setStyle[
+					toHybrid @ cell,
+					"StackExchangeEdit"
 				]
+				},
+				Replace[
+					new,
+					{
+					c_Cell :> NotebookWrite[EvaluationCell[], c, All],
+					o_ :> NotebookWrite[EvaluationCell[], old, All]
+					}
+				];
+				SelectionMove[EvaluationNotebook[], Before, CellContents]
 			]
 		]
 	],
 	Cell[StyleData["StackExchangeShowExpression", StyleDefinitions->StyleData["Text"]],
 		CellDynamicExpression :> With[{cell = NotebookRead@EvaluationCell[]},
+			SetOptions[EvaluationCell[], CellDynamicExpression->None];
 			If[!BooleanQ@$StackExchangeInitialization,
 				Get["StackExchange`"]; 
 				$StackExchangeInitialization = TrueQ@$StackExchangeInitialization
 			];
-			If[TrueQ@$StackExchangeInitialization,
-				NotebookWrite[EvaluationCell[], Cell[""], All];
-				NotebookWrite[
-					EvaluationNotebook[],
-					setStyle[
-						seString @ cell,
-						"StackExchangeEdit"
-					],
-					All
-				];
-				SelectionMove[EvaluationNotebook[], Before, CellContents],
-				NotebookWrite[EvaluationCell[], Cell[""], All];
-				NotebookWrite[
-					EvaluationCell[],
-					Replace[cell,
-						Cell[a_, _, b__] :>
-						Cell[a, "StackExchange", CellDynamicExpression:>None, b]
-					]
+
+			With[
+				{
+				old = Replace[cell,
+					Cell[a__, "StackExchangeShowExpression", b___] :> Cell[a, "StackExchange", b]
+				],
+				new = setStyle[
+					seString @ cell,
+					"StackExchangeEdit"
 				]
+				},
+				Replace[
+					new,
+					{
+					c_Cell :> NotebookWrite[EvaluationCell[], c, All],
+					o_ :> NotebookWrite[EvaluationCell[], old, All]
+					}
+				];
+				SelectionMove[EvaluationNotebook[], Before, CellContents]
 			]
 		]
 	],
 	Cell[StyleData["StackExchangeFormat", StyleDefinitions->StyleData["Text"]],
 		CellDynamicExpression :> With[{cell = NotebookRead@EvaluationCell[]},
 			SetOptions[EvaluationCell[], CellDynamicExpression->None];
+			If[!BooleanQ@$StackExchangeInitialization,
+				Get["StackExchange`"];
+				$StackExchangeInitialization = TrueQ@$StackExchangeInitialization
+			];
+
 			With[
 				{
 				old = Replace[cell,
@@ -397,7 +404,7 @@ $Stylesheet = Notebook[
 					o_ :> NotebookWrite[EvaluationCell[], old, All]
 					}
 				];
-				SelectionMove[EvaluationNotebook[], CellContents, Before]
+				SelectionMove[EvaluationNotebook[], Before, CellContents]
 			]
 		]
 	],
