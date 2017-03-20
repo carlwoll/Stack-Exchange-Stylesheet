@@ -8,7 +8,6 @@ convertInput::usage = "convert parsed input"
 setStyle::usage = "setStyle[cell, style] sets the style of cell"
 seString::usage = "seString returns the StackExchange string version"
 toHybrid::usage = "toHybrid converts a cell to an editable WYSIWYG version"
-inert
 
 $Stylesheet::usage = "Notebook expression corresponding to the stylesheet"
 
@@ -18,16 +17,10 @@ Begin["`Private`"]
 
 $StackExchangeInitialization = True
 
-inert[Cell[a_, s:Longest[__String], b___]] := Cell[a, s, CellDynamicExpression->None, b]
+setStyle[Cell[a_, Longest[___String], b___], style_String] := Cell[a, style, b]
 
-setStyle[Cell[a_, Longest[___String], b___], style_String] := (
-	foo`set0 = AbsoluteTime[];
-	Cell[a, style, b]
-)
-
-parseString[str_String] := Block[{interpretCode, $NewSymbol = Sow[#2<>#1]&, res},
-	foo`ps0=AbsoluteTime[];
-	res=First @ Reap[
+parseString[str_String] := Block[{interpretCode, $NewSymbol = Sow[#2<>#1]&},
+	First @ Reap[
 		StringReplace[str,
 			{
 			"``"~~Shortest[w__]~~"``":>Cell[w, If[NameQ[w], "Symbol", "CodeInput"]],
@@ -46,9 +39,7 @@ parseString[str_String] := Block[{interpretCode, $NewSymbol = Sow[#2<>#1]&, res}
 		],
 		_,
 		Remove /@ #2&
-	];
-	foo`ps1=AbsoluteTime[]-foo`ps0;
-	res
+	]
 ]
 
 interpretCode[w_] := Which[
@@ -79,27 +70,22 @@ mergeStrings = ReplaceAll[#,
 ]&
 
 Clear[parseInput]
-parseInput[c_] := Module[{res},
-	foo`pi0=AbsoluteTime[];
-	res = ReplaceAll[c,
+parseInput[c_] := ReplaceAll[c,
+	{
+	Cell[s_String,r___]:>Cell[TextData[List@@parseString[s]],r],
+	TextData[s_String]:>TextData[List@@parseString[s]],
+	TextData[s_List]:>TextData @ Replace[s,
 		{
-		Cell[s_String,r___]:>Cell[TextData[List@@parseString[s]],r],
-		TextData[s_String]:>TextData[List@@parseString[s]],
-		TextData[s_List]:>TextData @ Replace[s,
-			{
-			str_String:>Sequence@@parseString[str],
-			Cell[b_,r___] /; !MatchQ[{r}, {"Hyperlink"|"Symbol"|"CodeInput"|"TeXInput"|"InlineTeXInput", ___}] :> Cell[b, "InlineTeXInput"]
-			},
-			{1}
-		]
-		}
-	];
-	foo`pi1=AbsoluteTime[]-foo`pi0;
-	res
+		str_String:>Sequence@@parseString[str],
+		Cell[b_,r___] /; !MatchQ[{r}, {"Hyperlink"|"Symbol"|"CodeInput"|"TeXInput"|"InlineTeXInput", ___}] :> Cell[b, "InlineTeXInput"]
+		},
+		{1}
+	]
+	}
 ]
 
 Clear[convertInput]
-convertInput[c_] := (foo`ci0=AbsoluteTime[];ReplaceAll[c,
+convertInput[c_] := ReplaceAll[c,
 	{
 	Cell[s_,"Symbol", ___] :> makeSymbolBox[s],
 	Cell[s_,"CodeInput", ___] :> makeCodeBox[s],
@@ -108,7 +94,6 @@ convertInput[c_] := (foo`ci0=AbsoluteTime[];ReplaceAll[c,
 	Cell[{label_, link_}, "Hyperlink"] :> makeHyperlinkBox[label,link]
 	}
 ]
-)
 
 makeSymbolBox[BoxData[TemplateBox[{a_, b_}, "SymbolTemplate"]]] := If[StringQ@a,
 	makeSymbolBox[a],
