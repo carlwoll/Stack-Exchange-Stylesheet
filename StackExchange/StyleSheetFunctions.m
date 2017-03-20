@@ -8,6 +8,7 @@ convertInput::usage = "convert parsed input"
 setStyle::usage = "setStyle[cell, style] sets the style of cell"
 seString::usage = "seString returns the StackExchange string version"
 toHybrid::usage = "toHybrid converts a cell to an editable WYSIWYG version"
+inert
 
 $Stylesheet::usage = "Notebook expression corresponding to the stylesheet"
 
@@ -17,10 +18,16 @@ Begin["`Private`"]
 
 $StackExchangeInitialization = True
 
-setStyle[Cell[a_, Longest[___String], b___], style_String] := Cell[a, style, b]
+inert[Cell[a_, s:Longest[__String], b___]] := Cell[a, s, CellDynamicExpression->None, b]
 
-parseString[str_String] := Block[{interpretCode, $NewSymbol = Sow[#2<>#1]&},
-	First @ Reap[
+setStyle[Cell[a_, Longest[___String], b___], style_String] := (
+	foo`set0 = AbsoluteTime[];
+	Cell[a, style, b]
+)
+
+parseString[str_String] := Block[{interpretCode, $NewSymbol = Sow[#2<>#1]&, res},
+	foo`ps0=AbsoluteTime[];
+	res=First @ Reap[
 		StringReplace[str,
 			{
 			"``"~~Shortest[w__]~~"``":>Cell[w, If[NameQ[w], "Symbol", "CodeInput"]],
@@ -34,12 +41,14 @@ parseString[str_String] := Block[{interpretCode, $NewSymbol = Sow[#2<>#1]&},
 			"." ~~ ws:Whitespace ~~ WordBoundary ~~ Shortest[w__] ~~ WordBoundary :> "."<>ws<>w,
 			"["~~label__~~"]("~~link__~~")"/;StringFreeQ[label,"]"]&&StringFreeQ[link,")"] :> Cell[{label,link}, "Hyperlink"],
 			h:(LetterCharacter~~WordCharacter...)~~"["~~Shortest[w__]/;StringCount[h,WordBoundary|"$"]==2&&SyntaxQ[h<>"["<>w] :>Cell[h<>"["<>w,"CodeInput"],
-			WordBoundary~~w__~~WordBoundary /;StringLength[w]>1&&If[StringFreeQ[w,"`"],NameQ["System`"<>w],NameQ[w]] :>Cell[w,"Symbol"]
+			WordBoundary~~w:(WordCharacter..)~~WordBoundary /;StringLength[w]>1&&If[StringFreeQ[w,"`"],NameQ["System`"<>w],NameQ[w]] :>Cell[w,"Symbol"]
 			}
 		],
 		_,
 		Remove /@ #2&
-	]
+	];
+	foo`ps1=AbsoluteTime[]-foo`ps0;
+	res
 ]
 
 interpretCode[w_] := Which[
@@ -69,21 +78,28 @@ mergeStrings = ReplaceAll[#,
 	TextData[a_List] :> TextData[List @@ StringExpression @@ a]
 ]&
 
-parseInput = ReplaceAll[#,
-	{
-	Cell[s_String,r___]:>Cell[TextData[List@@parseString[s]],r],
-	TextData[s_String]:>TextData[List@@parseString[s]],
-	TextData[s_List]:>TextData @ Replace[s,
+Clear[parseInput]
+parseInput[c_] := Module[{res},
+	foo`pi0=AbsoluteTime[];
+	res = ReplaceAll[c,
 		{
-		str_String:>Sequence@@parseString[str],
-		Cell[b_,r___] /; !MatchQ[{r}, {"Hyperlink"|"Symbol"|"CodeInput"|"TeXInput"|"InlineTeXInput", ___}] :> Cell[b, "InlineTeXInput"]
-		},
-		{1}
-	]
-	}
-]&
+		Cell[s_String,r___]:>Cell[TextData[List@@parseString[s]],r],
+		TextData[s_String]:>TextData[List@@parseString[s]],
+		TextData[s_List]:>TextData @ Replace[s,
+			{
+			str_String:>Sequence@@parseString[str],
+			Cell[b_,r___] /; !MatchQ[{r}, {"Hyperlink"|"Symbol"|"CodeInput"|"TeXInput"|"InlineTeXInput", ___}] :> Cell[b, "InlineTeXInput"]
+			},
+			{1}
+		]
+		}
+	];
+	foo`pi1=AbsoluteTime[]-foo`pi0;
+	res
+]
 
-convertInput = ReplaceAll[#,
+Clear[convertInput]
+convertInput[c_] := (foo`ci0=AbsoluteTime[];ReplaceAll[c,
 	{
 	Cell[s_,"Symbol", ___] :> makeSymbolBox[s],
 	Cell[s_,"CodeInput", ___] :> makeCodeBox[s],
@@ -91,7 +107,8 @@ convertInput = ReplaceAll[#,
 	Cell[s_,"InlineTeXInput", ___] :> makeInlineTeXBox[s],
 	Cell[{label_, link_}, "Hyperlink"] :> makeHyperlinkBox[label,link]
 	}
-]&
+]
+)
 
 makeSymbolBox[BoxData[TemplateBox[{a_, b_}, "SymbolTemplate"]]] := If[StringQ@a,
 	makeSymbolBox[a],
@@ -377,29 +394,25 @@ $Stylesheet = Notebook[
 	],
 	Cell[StyleData["StackExchangeFormat", StyleDefinitions->StyleData["Text"]],
 		CellDynamicExpression :> With[{cell = NotebookRead@EvaluationCell[]},
-			If[!BooleanQ@$StackExchangeInitialization,
-				Get["StackExchange`"]; 
-				$StackExchangeInitialization = TrueQ@$StackExchangeInitialization
-			];
-			If[TrueQ@$StackExchangeInitialization,
-				NotebookWrite[EvaluationCell[], Cell[""], All];
-				NotebookWrite[
-					EvaluationNotebook[],
-					setStyle[
-						convertInput @ parseInput @ cell,
-						"StackExchange"
-					],
-					All
-				];
-				SelectionMove[EvaluationNotebook[], Before, CellContents],
-				NotebookWrite[EvaluationCell[], Cell[""], All];
-				NotebookWrite[
-					EvaluationCell[],
-					Replace[cell,
-						Cell[a_, _, b__] :>
-						Cell[a, "StackExchange", CellDynamicExpression:>None, b]
-					]
+			SetOptions[EvaluationCell[], CellDynamicExpression->None];
+			With[
+				{
+				old = Replace[cell,
+					Cell[a__, "StackExchangeFormat", b___] :> Cell[a, "StackExchange", b]
+				],
+				new = setStyle[
+					convertInput @ parseInput @ cell,
+					"StackExchange"
 				]
+				},
+				Replace[
+					new,
+					{
+					c_Cell :> NotebookWrite[EvaluationCell[], c, All],
+					o_ :> NotebookWrite[EvaluationCell[], old, All]
+					}
+				];
+				SelectionMove[EvaluationNotebook[], CellContents, Before]
 			]
 		]
 	],
